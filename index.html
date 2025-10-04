@@ -11,68 +11,24 @@
       text-align: center;
       padding: 40px;
     }
-    h2 {
-      margin-bottom: 20px;
-    }
-    .stars {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
-    }
-    .star {
-      font-size: 60px;
-      cursor: pointer;
-      color: lightgray;
-      transition: color 0.3s;
-    }
-    .star.selected {
-      color: gold;
-    }
+    h2 { margin-bottom: 20px; }
+    .stars { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+    .star { font-size: 60px; cursor: pointer; color: lightgray; transition: color 0.3s; }
+    .star.selected { color: gold; }
     .button {
       margin-top: 30px;
       background: linear-gradient(90deg, #8a4fff, #43e8d8);
-      color: white;
-      padding: 15px 40px;
-      border: none;
-      font-size: 18px;
-      border-radius: 20px;
-      cursor: pointer;
+      color: white; padding: 15px 40px; border: none;
+      font-size: 18px; border-radius: 20px; cursor: pointer;
       transition: opacity 0.3s;
     }
-    .button:hover {
-      opacity: 0.9;
-    }
-    .faces {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-    }
-    .face {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-      border: 3px solid transparent;
-      border-radius: 15px;
-      padding: 10px;
-      transition: border 0.3s;
-    }
-    .face.selected {
-      border: 3px solid #8a4fff;
-    }
-    .face img {
-      border-radius: 50%;
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-    }
-    .face span {
-      margin-top: 8px;
-      font-size: 18px;
-    }
+    .button:hover { opacity: 0.9; }
+    .faces { display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap; }
+    .face { display: flex; flex-direction: column; align-items: center; cursor: pointer;
+      border: 3px solid transparent; border-radius: 15px; padding: 10px; transition: border 0.3s; }
+    .face.selected { border: 3px solid #8a4fff; }
+    .face img { border-radius: 50%; width: 120px; height: 120px; object-fit: cover; }
+    .face span { margin-top: 8px; font-size: 18px; }
   </style>
 </head>
 <body>
@@ -85,11 +41,17 @@
   <div id="step2" style="display:none;">
     <h2>Кто вас обслуживал?</h2>
     <div class="faces" id="faces"></div>
-    <button class="button" onclick="submitForm()">Готово</button>
+    <!-- Форма для отправки на Google Script -->
+    <form id="reviewForm" action="ВАШ_GOOGLE_SCRIPT_URL" method="POST" target="hidden_iframe">
+      <input type="hidden" name="stars" id="starsInput">
+      <input type="hidden" name="seller" id="sellerInput">
+      <iframe name="hidden_iframe" style="display:none;"></iframe>
+      <button type="submit" class="button">Готово</button>
+    </form>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw-t9Q9xvFt_3iWCc0Ld_xuRLWxya5YnFP03ErK5TasdUlqisxILGAsC38qWklGGdJ/exec"; // сюда вставь свой Google Script URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw-t9Q9xvFt_3iWCc0Ld_xuRLWxya5YnFP03ErK5TasdUlqisxILGAsC38qWklGGdJ/exec"; // оставь для загрузки сотрудников
     let selectedStars = 0;
     let selectedSeller = null;
 
@@ -99,18 +61,15 @@
       const star = document.createElement("span");
       star.textContent = "★";
       star.classList.add("star");
-      star.dataset.value = i;
       star.onclick = () => {
         selectedStars = i;
         document.querySelectorAll(".star").forEach(s => s.classList.remove("selected"));
-        for (let j = 0; j < i; j++) {
-          document.querySelectorAll(".star")[j].classList.add("selected");
-        }
+        for (let j = 0; j < i; j++) document.querySelectorAll(".star")[j].classList.add("selected");
       };
       starsContainer.appendChild(star);
     }
 
-    // === 2. Загружаем сотрудников с Google Script ===
+    // === 2. Загружаем сотрудников (GET) ===
     fetch(SCRIPT_URL)
       .then(r => r.json())
       .then(data => {
@@ -118,46 +77,24 @@
         data.forEach(emp => {
           const face = document.createElement("div");
           face.classList.add("face");
-          face.innerHTML = `
-            <img src="${emp.photo}" alt="${emp.name}">
-            <span>${emp.name}</span>
-          `;
+          face.innerHTML = `<img src="${emp.photo}" alt="${emp.name}"><span>${emp.name}</span>`;
           face.onclick = () => {
             document.querySelectorAll(".face").forEach(f => f.classList.remove("selected"));
             face.classList.add("selected");
             selectedSeller = emp.name;
+            document.getElementById("sellerInput").value = selectedSeller;
           };
           facesContainer.appendChild(face);
         });
       })
-      .catch(err => {
-        console.error("Ошибка загрузки сотрудников:", err);
-      });
+      .catch(err => console.error("Ошибка загрузки сотрудников:", err));
 
     // === 3. Переход к шагу 2 ===
     function goToStep2() {
       if (selectedStars === 0) return alert("Пожалуйста, выберите оценку");
+      document.getElementById("starsInput").value = selectedStars;
       document.getElementById("step1").style.display = "none";
       document.getElementById("step2").style.display = "block";
-    }
-
-    // === 4. Отправка результата ===
-    function submitForm() {
-      if (!selectedSeller) return alert("Пожалуйста, выберите продавца");
-      const data = { stars: selectedStars, seller: selectedSeller };
-
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-        .then(() => {
-          alert(`Спасибо! Вы поставили ${selectedStars} ⭐ продавцу ${selectedSeller}.`);
-          setTimeout(() => location.reload(), 2000);
-        })
-        .catch(() => {
-          alert("Произошла ошибка. Попробуйте снова.");
-        });
     }
   </script>
 </body>
