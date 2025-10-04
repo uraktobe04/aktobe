@@ -44,7 +44,7 @@
     <div class="faces" id="faces"></div>
 
     <!-- Форма для отправки на Google Script -->
-    <form id="reviewForm" action="ВАШ_GOOGLE_SCRIPT_URL" method="POST" target="hidden_iframe" onsubmit="return validateForm()">
+    <form id="reviewForm" action="https://script.google.com/macros/s/AKfycbzJ-C0NgoYRYMTSvaBbdhOmGyWUTcYDO85Q7xCLAAD53ueTqqQcrzylDwiXYiVXQZxU/exec" method="POST" target="hidden_iframe" onsubmit="return validateForm()">
       <input type="hidden" name="stars" id="starsInput">
       <input type="hidden" name="seller" id="sellerInput">
       <button type="submit" class="button">Готово</button>
@@ -53,7 +53,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcXSOUzoAzJxoaowgHvlqBjMDjybugMfq_nvnTFxSK100Jye5rL1Zww25gEBcNgfaB/exec"; // вставь сюда URL Google Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJ-C0NgoYRYMTSvaBbdhOmGyWUTcYDO85Q7xCLAAD53ueTqqQcrzylDwiXYiVXQZxU/exec"; // вставь сюда URL Google Script
     let selectedStars = 0;
     let selectedSeller = null;
 
