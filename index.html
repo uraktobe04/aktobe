@@ -92,7 +92,7 @@
       })
       .catch(err => console.error("Ошибка загрузки сотрудников:", err));
 
-    // === 3. Переход к шагу 2 ===
+    // === 3. Переход к шагу 2 ==
     function goToStep2() {
       if (selectedStars === 0) return alert("Пожалуйста, выберите оценку");
       document.getElementById("starsInput").value = selectedStars;
